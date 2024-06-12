@@ -1,0 +1,51 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#define NUM_LANES 16 
+#define CAPACITY_LANES 8 
+#define UPDATE_INTERVAL 100000000 
+
+void update_state(uint64_t state[NUM_LANES]) {
+    int i;
+	for ( i = 0; i < NUM_LANES; i++) {
+        state[i]++;
+    }
+}
+int check_capacity_lanes(uint64_t state[NUM_LANES]) {
+    int i;
+	for ( i = 0; i < CAPACITY_LANES; i++) {
+        if (state[i] == 0) {
+            return 0; 
+        }
+    }
+    return 1; 
+
+int main() {
+   
+    uint64_t state[NUM_LANES];
+    memset(state, 0, sizeof(state));
+  int i;
+    for ( i = CAPACITY_LANES; i < NUM_LANES; i++) {
+        state[i] = i + 1;
+    }
+
+    int iterations = 0;
+    while (!check_capacity_lanes(state)) {
+        update_state(state);
+        iterations++;
+
+        if (iterations % UPDATE_INTERVAL == 0) {
+            printf("Iterations: %d\n", iterations);
+        }
+    }
+
+    printf("Number of iterations until all capacity lanes have at least one nonzero bit: %d\n", iterations);
+
+    return 0;
+}
+
+OUTPUT:
+ECB Ciphertext: 54 68 69 73 20 69 73 20 61 20 73 65 63 72 65 74 20 6d 65 73 73 61 67 65 2e 20 49 74 20 6e 65 65 64 73 20 74 6f 20 62 65 20 65 6e 63 72 79 70 74 65 64 2e 80 00 00 00 00 00 00 00 00 00 00 00 00
+CBC Ciphertext: 54 68 69 73 20 69 73 20 61 20 73 65 63 72 65 74 74 05 0c 00 53 08 14 45 4f 00 3a 11 43 1c 00 11 10 76 2c 74 3c 28 76 20 6f 65 54 72 31 65 70 65 75 12 02 f4 3c 28 76 20 6f 65 54 72 31 65 70 65
+CFB Ciphertext: 54 68 69 73 20 69 73 20 61 20 73 65 63 72 65 74 74 05 0c 00 53 08 14 45 4f 00 3a 11 43 1c 00 11 10 76 2c 74 3c 28 76 20 6f 65 54 72 31 65 70 65 75 12 02 f4 3c 28 76 20 6f 65 54 72 31 65 70 65
