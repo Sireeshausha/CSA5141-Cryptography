@@ -1,0 +1,45 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+
+#define NUM_LANES 16 
+#define CAPACITY_LANES 8 
+#define UPDATE_INTERVAL 100000000 
+void update_state(uint64_t state[NUM_LANES]) {
+    int i;
+	for ( i = 0; i < NUM_LANES; i++) {
+      
+        state[i]++;
+    }
+}
+int check_capacity_lanes(uint64_t state[NUM_LANES]) {
+    int i;
+	for ( i = 0; i < CAPACITY_LANES; i++) {
+        if (state[i] == 0) {
+            return 0; 
+        
+    }
+    return 1; 
+}
+
+int main() {
+    uint64_t state[NUM_LANES];
+    memset(state, 0, sizeof(state));
+  int i;
+    for ( i = CAPACITY_LANES; i < NUM_LANES; i++) {
+        state[i] = i + 1;
+    }
+
+    int iterations = 0;
+    while (!check_capacity_lanes(state)) {
+        update_state(state);
+        iterations++;
+        if (iterations % UPDATE_INTERVAL == 0) {
+            printf("Iterations: %d\n", iterations);
+        }
+    }
+
+    printf("Number of iterations until all capacity lanes have at least one nonzero bit: %d\n", iterations);
+
+    return 0;
+}
