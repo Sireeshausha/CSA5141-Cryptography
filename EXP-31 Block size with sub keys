@@ -1,0 +1,72 @@
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#define BLOCK_SIZE_64 8
+#define BLOCK_SIZE_128 16
+
+const uint64_t Rb64 = 0x1B;  
+const uint8_t Rb128 = 0x87;  
+
+void left_shift(uint8_t* input, int block_size) {
+    int carry = 0;
+    for (int i = block_size - 1; i >= 0; --i) {
+        int new_carry = (input[i] & 0x80) ? 1 : 0;
+        input[i] = (input[i] << 1) | carry;
+        carry = new_carry;
+    }
+}
+
+void generate_subkeys(const uint8_t* key, int block_size, uint8_t* K1, uint8_t* K2) {
+    uint8_t L[block_size];
+    memcpy(L, key, block_size);
+    left_shift(L, block_size);
+    if ((key[0] & 0x80) != 0) {
+        if (block_size == BLOCK_SIZE_64) {
+            L[block_size - 1] ^= Rb64;
+        } else {
+            L[block_size - 1] ^= Rb128;
+        }
+    }
+    memcpy(K1, L, block_size);
+
+    left_shift(L, block_size);
+
+    if ((K1[0] & 0x80) != 0) {
+        if (block_size == BLOCK_SIZE_64) {
+            L[block_size - 1] ^= Rb64;
+        } else {
+            L[block_size - 1] ^= Rb128;
+        }
+    }
+
+    memcpy(K2, L, block_size);
+}
+
+int main() {
+    uint8_t key128[BLOCK_SIZE_128] = {0};
+    uint8_t K1_128[BLOCK_SIZE_128] = {0};
+    uint8_t K2_128[BLOCK_SIZE_128] = {0};
+    uint8_t key64[BLOCK_SIZE_64] = {0};
+    uint8_t K1_64[BLOCK_SIZE_64] = {0};
+    uint8_t K2_64[BLOCK_SIZE_64] = {0};
+    generate_subkeys(key128, BLOCK_SIZE_128, K1_128, K2_128);
+    printf("128-bit K1: ");
+    for (int i = 0; i < BLOCK_SIZE_128; ++i) printf("%02X ", K1_128[i]);
+    printf("\n128-bit K2: ");
+    for (int i = 0; i < BLOCK_SIZE_128; ++i) printf("%02X ", K2_128[i]);
+    printf("\n");
+    generate_subkeys(key64, BLOCK_SIZE_64, K1_64, K2_64);
+    printf("64-bit K1: ");
+    for (int i = 0; i < BLOCK_SIZE_64; ++i) printf("%02X ", K1_64[i]);
+    printf("\n64-bit K2: ");
+    for (int i = 0; i < BLOCK_SIZE_64; ++i) printf("%02X ", K2_64[i]);
+    printf("\n");
+
+    return 0;
+}
+
+OUTPUT:
+128-bit K1: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+128-bit K2: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+64-bit K1: 00 00 00 00 00 00 00 00
+64-bit K2: 00 00 00 00 00 00 00 00
